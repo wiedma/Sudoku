@@ -2,6 +2,12 @@ package org.Sudoku;
 
 import java.util.ArrayList;
 
+/**
+ * This class represents a Sudoku. The Sudoku is saved in an Integer matrix.\n
+ * It provides useful methods for checking, creating, im- and exporting Sudokus.
+ * @author Marco
+ *
+ */
 public class Sudoku {
 	
 	/**
@@ -17,6 +23,11 @@ public class Sudoku {
 	private int[][] values;
 	
 	/**
+	 * A boolean Matrix representing the values which aren't allowed to be changed.
+	 */
+	private boolean[][] fixedValues;
+	
+	/**
 	 * The standard value which represents an empty field in the Sudoku.
 	 */
 	public static final int STANDARD_VALUE = 0;
@@ -28,9 +39,11 @@ public class Sudoku {
 	public Sudoku(int size) {
 		this.size = size;
 		values = new int[size*size][size*size];
+		fixedValues = new boolean[size*size][size*size];
 		for(int i = 0; i < size*size; i++) {
 			for(int j = 0; j < size*size; j++) {
 				values[i][j] = STANDARD_VALUE;
+				fixedValues[i][j] = false;
 			}
 		}
 	}
@@ -48,8 +61,30 @@ public class Sudoku {
 		else {
 			throw new IllegalSudokuSizeException();
 		}
+		for(int i = 0; i < size*size; i++) {
+			for(int j = 0; j < size*size; j++) {
+				fixedValues[i][j] = values[i][j] != STANDARD_VALUE ? true : false;
+			}
+		}
 		if(!validate()) {
 			throw new InvalidSudokuValuesException();
+		}
+	}
+	
+	/**
+	 * Creates a Sudoku of size 3 from a String
+	 * @param s The Sudoku as generated from toString() Method
+	 */
+	public Sudoku(String s) {
+		size = 3;
+		values = new int[size*size][size*size];
+		int value;
+		for(int i = 0; i < size*size; i++) {
+			for(int j = 0; j < size*size; j++) {
+				value = Integer.parseInt(s.charAt(i * size * size + j) + "");
+				values[i][j] = value;
+				fixedValues[i][j] = value != STANDARD_VALUE ? true : false;
+			}
 		}
 	}
 	
@@ -174,6 +209,38 @@ public class Sudoku {
 			}
 		}
 		return s;
+	}
+	
+	/**
+	 * Displays a Sudoku on the console
+	 */
+	public void display() {
+		for(int i = 0; i < size*size; i++) {
+			for(int j = 0; j < size * size; j++) {
+				System.out.print(values[i][j]);
+			}
+			System.out.print("\n");
+		}
+	}
+	
+	/**
+	 * Tries to set a value at the given position to a given number.\n
+	 * The attempt fails if\n
+	 * \t a) The position given in the arguments is not valid for this Sudoku \n
+	 * \t b) The number at the given position is classified as fixed because it was defined at the Sudokus creation. \n
+	 * \t c) The given number is outside the range for this Sudoku (grater than size^2 or less than one)
+	 * @param xpos the x-position at which the method tries to insert the number
+	 * @param ypos the y-position at which the method tries to insert the number
+	 * @param number the number the method tries to insert
+	 */
+	public void setNumberAt(int xpos, int ypos, int number) {
+		if(fixedValues[xpos][ypos]) return;
+		if(number > size*size || number < 1) return;
+		try {
+			values[xpos][ypos] = number;
+		} catch(ArrayIndexOutOfBoundsException e) {
+			return;
+		}
 	}
 
 }
